@@ -11,6 +11,11 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
+          # Déclaration partielle option 2)
+          #bind:
+          #  $omdbToken: '28c5b7b1'
+          #  $omdbHost: 'https://www.omdbapi.com/'
+
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:
@@ -23,3 +28,37 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+              #    App\MailerInterface:
+              #      alias: '@App\OutlookMailer'
+              #      #class: App\GmailerMailer
+              #      #...
+              #
+              #    App\MailerInterface $gmail:
+              #      alias: '@App\GmailMailer'
+              #
+              #    App\GmailerMailer:
+              #      arguments:
+              #        #...
+              #
+              #    App\OutlookMailer:
+              #      arguments:
+              #        #...
+
+
+    # Déclaration partielle option 1)
+    App\Omdb\OmdbClient:
+      arguments:
+        $omdbToken: '%env(OMDB_TOKEN)%'
+        $omdbHost: 'https://www.omdbapi.com/'
+      #calls:
+        #setEntityManager: ['@entity_manager', '@...']
+
+
+    # Déclaration explicite service
+    #App\Omdb\OmdbClient:
+    #  autowire: false
+    #  arguments:
+    #    $omdbToken: '28c5b7b1'
+    #    $omdbHost: 'https://www.omdbapi.com/'
+    #    $omdbClient: '@Symfony\Contracts\HttpClient\HttpClientInterface'

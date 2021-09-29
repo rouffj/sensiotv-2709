@@ -1,0 +1,22 @@
+### src/Form/UserType.php ###
+### inside controller ###
+use App\Form\UserType;
+
+//...
+
+        $form = $this->createForm(UserType::class);
+
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            $entity = $form->getData();
+            // TODO: Your entity is ready to be inserted into DB
+        }
+
+### inside template ###
+{{ form_start(form, {attr: {novalidate: ''}}) }}
+    {( form_row(form.firstName) )}
+    {( form_row(form.lastName) )}
+    {( form_row(form.email) )}
+    {( form_row(form.phone) )}
+    {( form_row(form.password) )}
+{{ form_end(form) }}
+

@@ -1,3 +1,19 @@
+{% macro render_imported_movie(movie) %}
+    <div class="row">
+        <div class="col-lg-3">
+            <a href="/movie/{{ movie.id }}" title="The Matrix Reloaded" class="album-link">
+                <img height="209" width="140" src="{{ movie.poster }}">
+            </a>
+        </div>
+        <div class="col-lg-9">
+            <a href="/movie/{{ movie.id }}" title="Click to see the movie details"><h6 class="m-1 font-weight-bold">{{ movie.title }}</h6></a>
+            <small class="text-success font-weight-bold m-1">{{ movie.releaseDate|date('Y-m-d') }}</small>
+            <p class="ml-1 mr-1 mt-3 mb-2"><span class="text-muted">{{ movie.plot }}</span></p>
+        </div>
+    </div>
+    <hr />
+{% endmacro %}
+
 {% macro render_review(review) %}
     <div class="row p-sm-5">
         <div class="col-md-2">
@@ -38,9 +54,7 @@
         <td><img src="{{ movie.Poster }}" width="45" height="67" alt="{{ movie.Title }}"></td>
         <td>{{ movie.Title }} <span class="text-muted">({{ movie.Year }})</td>
         <td>
-            {% if is_granted('ROLE_USER') %}
             <a href="/movie/{{ movie.imdbID }}/import" title="Import movie data from IMDB into database"><i class="far fa-arrow-alt-circle-down"></i></a>
-            {% endif %}
 
             <a style="padding-left: 3px" href="https://www.imdb.com/title/{{ movie.imdbID }}/" title="Show movie on IMDB"><i class="far fa-eye"></i></a>
         </td>

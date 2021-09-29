@@ -4,34 +4,64 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Omdb\OmdbClient;
+use App\Entity\Movie;
+use App\Repository\MovieRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/movie", name="movie_", methods={"GET"})
  */
 class MovieController extends AbstractController
 {
-    #[Route("/{id}", name:"show", requirements:["id" => "\d+"], defaults:["id" => 1])]
-    public function show($id): Response
+    public function __construct(private OmdbClient $omdbClient)
     {
-        dump($id);
-
-        return $this->render('movie/show.html.twig');
     }
 
-    /**
-     * @Route("/search", name="search")
-     */
-    public function search(): Response
+    #[Route("/{id}", name:"show", requirements:["id" => "\d+"], defaults:["id" => 1])]
+    public function show($id, MovieRepository $movieRepository): Response
     {
-        return $this->render('movie/search.html.twig');
+        $movie = $movieRepository->find($id);
+
+        return $this->render('movie/show.html.twig', [
+            'movie' => $movie,
+        ]);
+    }
+
+    #[Route("/search", name: "search")]
+    public function search(Request $request): Response
+    {
+        $keyword = $request->query->get('keyword', 'Tech');
+        $search = $this->omdbClient->requestAllBySearch($keyword);
+
+        return $this->render('movie/search.html.twig', [
+            'keyword' => $keyword,
+            'movies' => $search['Search'],
+        ]);
     }
 
     /**
      * @Route("/latest", name="latest")
      */
-    public function latest(): Response
+    public function latest(MovieRepository $movieRepository): Response
     {
-        return $this->render('movie/latest.html.twig');
+        $movies  = $movieRepository->findAll();
+
+        return $this->render('movie/latest.html.twig', [
+            'movies' => $movies,
+        ]);
+    }
+
+    #[Route("/{imdbId}/import")]
+    public function import($imdbId, EntityManagerInterface $entityManager): Response
+    {
+        $movieAsArray = $this->omdbClient->requestOneById($imdbId);
+        $movie = Movie::fromApi($movieAsArray);
+        $entityManager->persist($movie);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('movie_latest');
     }
 }
