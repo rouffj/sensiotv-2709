@@ -15,6 +15,7 @@ use App\Entity\User;
 use App\Entity\Review;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
@@ -34,6 +35,7 @@ class UserController extends AbstractController
     }
 
     #[Route("", methods: "POST")]
+    #[IsGranted("ROLE_ADMIN")]
     public function post(Request $request): Response
     {
         $jsonSent = $request->getContent();
@@ -92,6 +94,7 @@ class UserController extends AbstractController
     }
 
     #[Route("/{id}", methods: "PUT")]
+    #[IsGranted("ROLE_ADMIN")]
     public function edit(Request $request, $id, UserRepository $userRepository): Response
     {
         $user = $userRepository->find($id);
