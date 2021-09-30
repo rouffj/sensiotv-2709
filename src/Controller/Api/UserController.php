@@ -67,7 +67,11 @@ class UserController extends AbstractController
         $paginatedUsers->setCurrentPage($page);
 
         //$paginatedUsers = new Paginator('Select * from ...');
-        return JsonResponse::fromJsonString($this->serializer->serialize($paginatedUsers, 'json'));
+        return JsonResponse::fromJsonString($this->serializer->serialize($paginatedUsers, 'json', [
+            'circular_reference_handler' => function($object, $format, $context) {
+                return $object->getId();
+            },
+        ]));
         //return JsonResponse::fromJsonString($this->serializer->serialize($users, 'json'));
         //return JsonResponse::fromJsonString($this->serializer->serialize($users, 'json', [
             //'groups' => ['user_list', 'relation'],

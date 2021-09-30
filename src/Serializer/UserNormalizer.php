@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use App\Entity\User;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
@@ -21,9 +22,16 @@ class UserNormalizer implements ContextAwareNormalizerInterface
      */
     public function normalize($user, string $format = null, array $context = [])
     {
+        $context['circular_reference_handler'] = function($object, $format, $context) {
+            return $object->getId();
+        };
         $data = $this->normalizer->normalize($user, $format, $context);
 
-        // TODO
+        if (!is_array($data)) {
+            // Gère le cas où le user est en circularReference. Ici data returnera le $userId
+            return $data;
+        }
+
         if (isset($data['id'])) {
             $data['user_url'] = '/api/users/' . $data['id'];
         }

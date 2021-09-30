@@ -46,6 +46,7 @@ class PagerFantaNormalizer implements ContextAwareNormalizerInterface
 
     public function supportsNormalization($data, string $format = null, array $context = [])
     {
-        return $data instanceof Pagerfanta;
+        return false;
+        //return $data instanceof Pagerfanta;
     }
 }

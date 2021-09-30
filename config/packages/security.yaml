@@ -1,6 +1,6 @@
 security:
     # https://symfony.com/doc/current/security/authenticator_manager.html
-    enable_authenticator_manager: true
+    enable_authenticator_manager: false
     # https://symfony.com/doc/current/security.html#c-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
@@ -17,9 +17,15 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
+            stateless: true # avoid session to start on API
             lazy: true
             provider: app_user_provider
 
+            guard:
+                authenticators:
+                  #- App\Omdb\OmdbClient
+                    - App\Security\ApiTokenAuthenticator
+                entry_point: App\Security\ApiTokenAuthenticator
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
 
