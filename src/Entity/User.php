@@ -6,6 +6,9 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
+use Symfony\Component\Serializer\Annotation\Ignore;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
@@ -21,17 +24,20 @@ class User
     /**
      * @ORM\Column(type="string", length=30)
      */
+    #[Groups(['user_list'])]
     private $firstName;
 
     /**
      * @ORM\Column(type="string", length=60)
      */
+    #[Groups(['user_list'])]
     private $lastName;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
     #[Assert\Email()]
+    #[Groups(['user_list'])]
     private $email;
 
     /**
@@ -43,11 +49,42 @@ class User
     /**
      * @ORM\Column(type="string", length=255)
      */
+    #[Ignore()]
     private $password;
+
+    #[Groups(['relation'])]
+    private $reviews = [];
+
+    /**
+     * @ORM\OneToOne(targetEntity=ApiUser::class, mappedBy="user", cascade={"persist", "remove"})
+     */
+    private $apiUser;
+
+    /**
+     * @ORM\Column(type="json")
+     */
+    private $roles = [];
+
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
     }
 
     public function getFirstName(): ?string
@@ -62,7 +99,7 @@ class User
         return $this;
     }
 
-    #[Assert\IsTrue()]
+    #   [Assert\IsTrue()]
     public function isPhoneValid()
     {
         $ret = preg_match('/^\d{10,10}$/', $this->phone, $matches);
@@ -116,6 +153,33 @@ class User
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getReviews()
+    {
+        return $this->reviews;
+    }
+
+    public function addReview(Review $review)
+    {
+        $this->reviews[] = $review;
+    }
+
+    public function getApiUser(): ?ApiUser
+    {
+        return $this->apiUser;
+    }
+
+    public function setApiUser(ApiUser $apiUser): self
+    {
+        // set the owning side of the relation if necessary
+        if ($apiUser->getUser() !== $this) {
+            $apiUser->setUser($this);
+        }
+
+        $this->apiUser = $apiUser;
 
         return $this;
     }
