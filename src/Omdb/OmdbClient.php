@@ -22,12 +22,6 @@ final class OmdbClient
     /** @var string OMDb host. */
     private $host;
 
-    /**
-     * @required
-     * @var \Doctrine\ORM\EntityManagerInterface
-     */
-    private $entityManager;
-
     /** @var array Optional parameters to complete a request. */
     private const OPTIONAL_PARAMS = [
         'type',
@@ -51,7 +45,7 @@ final class OmdbClient
 
     public function requestOneById($mediaId, array $options = []): array
     {
-        $ptions = array_merge([$mediaId], $options);
+        $options = array_merge([$mediaId], $options);
 
         return $this->requestBy(
             $this->validQueryParameters('i', $options)
@@ -120,4 +114,3 @@ final class OmdbClient
         return array_merge(['apikey' => $this->token, $requestParameter => $arguments[0]], $arguments[1]);
     }
 }
-

@@ -93,8 +93,8 @@ class UserController extends AbstractController
         return JsonResponse::fromJsonString($this->serializer->serialize($user, 'json'));
     }
 
-    #[Route("/{id}", methods: "PUT")]
-    #[IsGranted("ROLE_ADMIN")]
+    #[Route("/{id}", methods: "PATCH")]
+    #   [IsGranted("ROLE_ADMIN")]
     public function edit(Request $request, $id, UserRepository $userRepository): Response
     {
         $user = $userRepository->find($id);
@@ -102,6 +102,8 @@ class UserController extends AbstractController
         if (!$user) {
             throw $this->createNotFoundException('User not found');
         }
+
+        $this->denyAccessUnlessGranted('USER_EDIT', $user);
 
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json', ['object_to_populate' => $user]);
         $this->entityManager->flush();

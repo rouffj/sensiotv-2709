@@ -10,6 +10,8 @@ use App\Omdb\OmdbClient;
 use App\Entity\Movie;
 use App\Repository\MovieRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use App\Event\MovieImportedEvent;
 
 /**
  * @Route("/movie", name="movie_", methods={"GET"})
@@ -55,12 +57,14 @@ class MovieController extends AbstractController
     }
 
     #[Route("/{imdbId}/import")]
-    public function import($imdbId, EntityManagerInterface $entityManager): Response
+    public function import($imdbId, EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher): Response
     {
         $movieAsArray = $this->omdbClient->requestOneById($imdbId);
         $movie = Movie::fromApi($movieAsArray);
         $entityManager->persist($movie);
         $entityManager->flush();
+
+        $eventDispatcher->dispatch(new MovieImportedEvent($movie), 'movie_imported');
 
         return $this->redirectToRoute('movie_latest');
     }
